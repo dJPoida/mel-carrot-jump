@@ -3,24 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bunny Adventure</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Carrot Jump</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="src/styles.css">
 </head>
 <body>
     <div class="game-container">
         <canvas id="gameCanvas"></canvas>
         <div class="game-overlay">
             <div id="score">Score: 0</div>
+            <div id="lives"></div>
             <div id="highScore">High Score: 0</div>
-            <div id="lives" class="hearts"></div>
-            <div id="gameOver" class="hidden">
-                <h2 id="gameOverTitle">Game Over!</h2>
-                <p>Your Score: <span id="finalScore">0</span></p>
-                <p>High Score: <span id="finalHighScore">0</span></p>
-                <button id="restartButton">Play Again</button>
-            </div>
         </div>
     </div>
-    <script src="game.js"></script>
+    <script type="module" src="src/index.ts"></script>
 </body>
 </html> 

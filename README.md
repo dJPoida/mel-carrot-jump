@@ -1,36 +1,71 @@
-# Bunny Adventure Game
+# Bunny Game
 
-A fun side-scrolling platformer where you control a cute bunny jumping over obstacles and collecting carrots!
+A fun bunny jumping game built with TypeScript and HTML5 Canvas. Collect carrots, avoid spikes, and try to get the highest score!
 
-## How to Play
+## Features
 
-1. Open `index.html` in your web browser
-2. Press the SPACE bar to make the bunny jump
-3. Avoid red obstacles and holes
-4. Collect orange carrots for bonus points
-5. Use green platforms to reach higher areas
-6. Try to survive as long as possible!
+- Smooth animations and particle effects
+- Sound effects for jumping, collecting carrots, and more
+- Progressive difficulty as you collect carrots
+- High score system with local storage
+- Double jump mechanics
+- Death animation with screen shake
+- Responsive controls
 
-## Game Features
+## Development Setup
 
-- Endless side-scrolling gameplay
-- Increasing difficulty over time
-- Score tracking
-- Pixel art style graphics
-- Simple one-button controls
-- Collectible carrots
-- Platforming elements
+1. Install dependencies:
+```bash
+npm install
+```
 
-## Technical Details
+2. Start development server:
+```bash
+npm start
+```
 
-The game is built using:
-- HTML5 Canvas
-- JavaScript
-- CSS3
+3. Run tests:
+```bash
+npm test
+```
 
-No additional dependencies required - just open the HTML file in a modern web browser to play!
+4. Build for production:
+```bash
+npm run build
+```
+
+## Project Structure
+
+```
+src/
+├── assets/         # Static assets
+├── game/           # Game logic and components
+│   ├── __tests__/  # Test files
+│   ├── constants.ts
+│   ├── Game.ts
+│   ├── Particle.ts
+│   └── SoundManager.ts
+├── types/          # TypeScript type definitions
+├── utils/          # Utility functions
+├── index.ts        # Main entry point
+└── styles.css      # Global styles
+```
 
 ## Controls
 
-- SPACE: Jump
-- Click "Play Again" button to restart after game over 
+- **Space**: Jump (press twice for double jump)
+- **Enter**: Restart game (when game over)
+- **Double-click High Score**: Reset high score
+
+## Technologies Used
+
+- TypeScript
+- HTML5 Canvas
+- Vite
+- Vitest
+- ESLint
+- Prettier
+
+## License
+
+MIT 
