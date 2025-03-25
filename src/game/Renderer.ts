@@ -249,15 +249,6 @@ export class Renderer {
         this.ctx.fillStyle = '#FFA500';
         this.ctx.fillText('CARROT JUMP', constants.CANVAS_WIDTH / 2, constants.SPLASH_TITLE_Y);
 
-        // Add pixel grid effect to title
-        this.ctx.strokeStyle = 'rgba(255, 165, 0, 0.3)';
-        this.ctx.lineWidth = 1;
-        for (let y = constants.SPLASH_PIXEL_GRID_START_Y; y < constants.SPLASH_PIXEL_GRID_END_Y; y += constants.SPLASH_PIXEL_GRID_SIZE) {
-            for (let x = constants.SPLASH_PIXEL_GRID_START_X; x < constants.SPLASH_PIXEL_GRID_END_X; x += constants.SPLASH_PIXEL_GRID_SIZE) {
-                this.ctx.strokeRect(x, y, constants.SPLASH_PIXEL_GRID_SIZE, constants.SPLASH_PIXEL_GRID_SIZE);
-            }
-        }
-
         // Draw retro box
         this.ctx.fillStyle = '#000000';
         this.ctx.fillRect(constants.SPLASH_BOX_X, constants.SPLASH_BOX_Y, 
@@ -305,42 +296,6 @@ export class Renderer {
             constants.SPLASH_START_Y - constants.SPLASH_START_SHADOW_OFFSET);
         
         this.ctx.globalAlpha = 1;
-
-        // Draw corner decorations
-        this.ctx.strokeStyle = '#FFA500';
-        this.ctx.lineWidth = 2;
-        
-        // Top left corner
-        this.ctx.beginPath();
-        this.ctx.moveTo(constants.SPLASH_BOX_X, constants.SPLASH_BOX_Y);
-        this.ctx.lineTo(constants.SPLASH_BOX_X + constants.SPLASH_CORNER_LENGTH, constants.SPLASH_BOX_Y);
-        this.ctx.moveTo(constants.SPLASH_BOX_X, constants.SPLASH_BOX_Y);
-        this.ctx.lineTo(constants.SPLASH_BOX_X, constants.SPLASH_BOX_Y + constants.SPLASH_CORNER_OFFSET);
-        this.ctx.stroke();
-        
-        // Top right corner
-        this.ctx.beginPath();
-        this.ctx.moveTo(constants.SPLASH_BOX_X + constants.SPLASH_BOX_WIDTH, constants.SPLASH_BOX_Y);
-        this.ctx.lineTo(constants.SPLASH_BOX_X + constants.SPLASH_BOX_WIDTH + constants.SPLASH_CORNER_LENGTH, constants.SPLASH_BOX_Y);
-        this.ctx.moveTo(constants.SPLASH_BOX_X + constants.SPLASH_BOX_WIDTH, constants.SPLASH_BOX_Y);
-        this.ctx.lineTo(constants.SPLASH_BOX_X + constants.SPLASH_BOX_WIDTH, constants.SPLASH_BOX_Y + constants.SPLASH_CORNER_OFFSET);
-        this.ctx.stroke();
-        
-        // Bottom left corner
-        this.ctx.beginPath();
-        this.ctx.moveTo(constants.SPLASH_BOX_X, constants.SPLASH_BOX_Y + constants.SPLASH_BOX_HEIGHT);
-        this.ctx.lineTo(constants.SPLASH_BOX_X + constants.SPLASH_CORNER_LENGTH, constants.SPLASH_BOX_Y + constants.SPLASH_BOX_HEIGHT);
-        this.ctx.moveTo(constants.SPLASH_BOX_X, constants.SPLASH_BOX_Y + constants.SPLASH_BOX_HEIGHT);
-        this.ctx.lineTo(constants.SPLASH_BOX_X, constants.SPLASH_BOX_Y + constants.SPLASH_BOX_HEIGHT - constants.SPLASH_CORNER_OFFSET);
-        this.ctx.stroke();
-        
-        // Bottom right corner
-        this.ctx.beginPath();
-        this.ctx.moveTo(constants.SPLASH_BOX_X + constants.SPLASH_BOX_WIDTH, constants.SPLASH_BOX_Y + constants.SPLASH_BOX_HEIGHT);
-        this.ctx.lineTo(constants.SPLASH_BOX_X + constants.SPLASH_BOX_WIDTH + constants.SPLASH_CORNER_LENGTH, constants.SPLASH_BOX_Y + constants.SPLASH_BOX_HEIGHT);
-        this.ctx.moveTo(constants.SPLASH_BOX_X + constants.SPLASH_BOX_WIDTH, constants.SPLASH_BOX_Y + constants.SPLASH_BOX_HEIGHT);
-        this.ctx.lineTo(constants.SPLASH_BOX_X + constants.SPLASH_BOX_WIDTH, constants.SPLASH_BOX_Y + constants.SPLASH_BOX_HEIGHT - constants.SPLASH_CORNER_OFFSET);
-        this.ctx.stroke();
     }
 
     public applyScreenShake(intensity: number): void {

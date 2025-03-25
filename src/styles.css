@@ -42,8 +42,7 @@ body {
 #score {
     position: absolute;
     top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
+    right: 20px;
     color: white;
     text-shadow: 2px 2px 0 #000;
     font-size: 20px;
@@ -60,11 +59,11 @@ body {
 
 #highScore {
     position: absolute;
-    top: 20px;
+    top: 50px;
     right: 20px;
     color: #FFD700;
     text-shadow: 2px 2px 0 #000;
-    font-size: 20px;
+    font-size: 16px;
     font-weight: bold;
     pointer-events: auto;
     cursor: pointer;

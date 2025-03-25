@@ -25,16 +25,13 @@ export const PLATFORM_MIN_WIDTH = PLATFORM_WIDTH * 0.75;
 export const PLATFORM_MAX_WIDTH = PLATFORM_WIDTH * 1.25;
 
 // Spawning
-export const INITIAL_OBSTACLE_SPAWN_RATE = 0.03;
+export const INITIAL_OBSTACLE_SPAWN_RATE = 0.005;
 export const INITIAL_CARROT_SPAWN_RATE = 0.015;
 export const INITIAL_PLATFORM_SPAWN_RATE = 0.005;
 export const PLATFORM_SPAWN_RATE = 0.005;
-export const PLATFORM_SPAWN_RATE_INCREASE = 0.0005;
-export const MIN_PLATFORM_SPAWN_RATE = 0.002;
-export const MIN_PLATFORMS_ON_SCREEN = 4;
 export const PLATFORM_SPACING = 50;
 export const PLATFORM_MIN_GAP = 0.25;
-export const OBSTACLE_SPAWN_RATE_INCREASE = 0.005;
+export const OBSTACLE_SPAWN_RATE_INCREASE = 0.001;
 export const CARROT_MIN_HEIGHT = 64;
 export const CARROT_MAX_HEIGHT = 160;
 export const PLATFORM_MIN_HEIGHT = 100;
@@ -42,7 +39,7 @@ export const PLATFORM_MAX_HEIGHT = 200;
 export const MAX_SPAWN_ATTEMPTS = 10;
 
 // Game Progression
-export const INITIAL_SCROLL_SPEED = 5;
+export const INITIAL_SCROLL_SPEED = 4;
 export const SPEED_INCREASE_PER_CARROT = 0.5;
 export const SCORE_PER_CARROT = 100;
 export const SPEED_INCREASE_SCORE_THRESHOLD = 200;

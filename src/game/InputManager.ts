@@ -10,6 +10,9 @@ export class InputManager {
     private onResetHighScore: () => void;
     private isSplashScreen: boolean = true;
     private stateManager: GameStateManager;
+    private keydownHandler: (event: KeyboardEvent) => void;
+    private mousedownHandler: () => void;
+    private touchstartHandler: (event: TouchEvent) => void;
 
     constructor(
         bunny: Bunny,
@@ -25,42 +28,74 @@ export class InputManager {
         this.onGameStart = onGameStart;
         this.onGameRestart = onGameRestart;
         this.onResetHighScore = onResetHighScore;
+        
+        // Store event handlers
+        this.keydownHandler = (event: KeyboardEvent) => {
+            if (event.code === 'Space') {
+                this.handleButtonPress();
+            }
+        };
+        this.mousedownHandler = () => this.handleButtonPress();
+        this.touchstartHandler = (event: TouchEvent) => {
+            event.preventDefault();
+            this.handleButtonPress();
+        };
+        
         this.setupEventListeners();
     }
 
     private setupEventListeners(): void {
-        document.addEventListener('keydown', (event) => this.handleKeyPress(event));
+        // Keyboard events
+        document.addEventListener('keydown', this.keydownHandler);
+        
+        // Mouse events
+        document.addEventListener('mousedown', (event) => {
+            // Don't trigger if clicking on high score
+            if (event.target instanceof HTMLElement && event.target.id === 'highScore') {
+                return;
+            }
+            this.handleButtonPress();
+        });
+        
+        // Touch events
+        document.addEventListener('touchstart', (event) => {
+            event.preventDefault(); // Prevent scrolling on mobile
+            // Don't trigger if touching high score
+            if (event.target instanceof HTMLElement && event.target.id === 'highScore') {
+                return;
+            }
+            this.handleButtonPress();
+        });
+        
+        // UI events
         document.getElementById('restartButton')?.addEventListener('click', () => this.onGameRestart());
         document.getElementById('highScore')?.addEventListener('dblclick', () => this.onResetHighScore());
     }
 
-    private handleKeyPress(event: KeyboardEvent): void {
+    private handleButtonPress(): void {
         if (this.isSplashScreen) {
-            if (event.code === 'Space') {
-                this.isSplashScreen = false;
-                this.onGameStart();
-            }
+            this.isSplashScreen = false;
+            this.onGameStart();
             return;
         }
 
         // Check if the game is over
         if (this.stateManager.getState().gameOver) {
-            if (event.code === 'Space' && this.stateManager.canRestart()) {
+            if (this.stateManager.canRestart()) {
                 this.onGameRestart();
             }
             return;
         }
 
-        if (event.code === 'Space') {
-            if (!this.bunny.isJumping) {
-                this.bunny.velocityY = constants.JUMP_FORCE;
-                this.bunny.isJumping = true;
-                this.onJump();
-            } else if (this.bunny.canDoubleJump) {
-                this.bunny.velocityY = constants.JUMP_FORCE;
-                this.bunny.canDoubleJump = false;
-                this.onJump();
-            }
+        // Handle jump
+        if (!this.bunny.isJumping) {
+            this.bunny.velocityY = constants.JUMP_FORCE;
+            this.bunny.isJumping = true;
+            this.onJump();
+        } else if (this.bunny.canDoubleJump) {
+            this.bunny.velocityY = constants.JUMP_FORCE;
+            this.bunny.canDoubleJump = false;
+            this.onJump();
         }
     }
 
@@ -74,6 +109,9 @@ export class InputManager {
     }
 
     public cleanup(): void {
-        document.removeEventListener('keydown', this.handleKeyPress);
+        // Remove all event listeners
+        document.removeEventListener('keydown', this.keydownHandler);
+        document.removeEventListener('mousedown', this.mousedownHandler);
+        document.removeEventListener('touchstart', this.touchstartHandler);
     }
 } 

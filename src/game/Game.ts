@@ -85,9 +85,7 @@ export class Game {
 
         this.stateManager.addEventListener('scoreUpdate', () => {
             this.objectManager.setScore(this.stateManager.getState().score);
-            if (this.stateManager.getState().score % constants.SPEED_INCREASE_SCORE_THRESHOLD === 0) {
-                this.stateManager.increaseScrollSpeed();
-            }
+            this.stateManager.increaseScrollSpeed();
         });
 
         this.stateManager.addEventListener('livesUpdate', () => {
@@ -266,7 +264,7 @@ export class Game {
             // Add a slight delay before playing the game over sound
             setTimeout(() => {
                 this.soundManager.playSound('gameOver');
-            }, 300);
+            }, 200); // Reduced from 300ms to 200ms
             this.stateManager.startDeathAnimation(
                 this.bunny,
                 constants.CANVAS_HEIGHT - constants.GROUND_HEIGHT - constants.BUNNY_HEIGHT

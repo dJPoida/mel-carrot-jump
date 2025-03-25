@@ -14,31 +14,67 @@ export class ObjectManager {
     }
 
     public spawnObstacle(): void {
+        // Only spawn obstacles if the player has collected at least one carrot
+        if (this.currentScore < constants.SCORE_PER_CARROT) {
+            return;
+        }
+
         const spawnRate = constants.INITIAL_OBSTACLE_SPAWN_RATE + 
-            (Math.floor(this.currentScore / constants.SCORE_PER_CARROT) * constants.OBSTACLE_SPAWN_RATE_INCREASE);
+            (this.currentScore / constants.SCORE_PER_CARROT) * constants.OBSTACLE_SPAWN_RATE_INCREASE;
 
         if (Math.random() < spawnRate) {
-            this.obstacles.push({
-                x: constants.CANVAS_WIDTH,
-                y: constants.CANVAS_HEIGHT - constants.GROUND_HEIGHT - constants.OBSTACLE_HEIGHT,
-                width: constants.OBSTACLE_WIDTH / 2, // Make spikes half width
-                height: constants.OBSTACLE_HEIGHT
+            // Check if there are any obstacles too close
+            const newObstacleX = constants.CANVAS_WIDTH;
+            const minDistance = constants.BUNNY_WIDTH; // Minimum distance between spikes
+
+            const isTooClose = this.obstacles.some(obstacle => {
+                const distance = Math.abs(newObstacleX - (obstacle.x + obstacle.width));
+                return distance < minDistance;
             });
+
+            if (!isTooClose) {
+                this.obstacles.push({
+                    x: newObstacleX,
+                    y: constants.CANVAS_HEIGHT - constants.GROUND_HEIGHT - constants.OBSTACLE_HEIGHT,
+                    width: constants.OBSTACLE_WIDTH / 2, // Make spikes half width
+                    height: constants.OBSTACLE_HEIGHT
+                });
+            }
         }
     }
 
     public spawnCarrot(): void {
+        // Don't spawn if we already have 2 carrots on screen
+        if (this.carrots.length >= 2) {
+            return;
+        }
+
         if (Math.random() < constants.INITIAL_CARROT_SPAWN_RATE) {
             const height = Math.random() * 
                 (constants.CARROT_MAX_HEIGHT - constants.CARROT_MIN_HEIGHT) + 
                 constants.CARROT_MIN_HEIGHT;
 
-            this.carrots.push({
-                x: constants.CANVAS_WIDTH,
-                y: constants.CANVAS_HEIGHT - constants.GROUND_HEIGHT - height,
-                width: constants.CARROT_WIDTH,
-                height: constants.CARROT_HEIGHT
+            const carrotY = constants.CANVAS_HEIGHT - constants.GROUND_HEIGHT - height;
+            const carrotX = constants.CANVAS_WIDTH;
+
+            // Check if the carrot would collide with any platform
+            const wouldCollide = this.platforms.some(platform => {
+                return !(
+                    carrotX + constants.CARROT_WIDTH < platform.x || // Carrot is left of platform
+                    carrotX > platform.x + platform.width ||        // Carrot is right of platform
+                    carrotY + constants.CARROT_HEIGHT < platform.y || // Carrot is above platform
+                    carrotY > platform.y + constants.PLATFORM_HEIGHT  // Carrot is below platform
+                );
             });
+
+            if (!wouldCollide) {
+                this.carrots.push({
+                    x: carrotX,
+                    y: carrotY,
+                    width: constants.CARROT_WIDTH,
+                    height: constants.CARROT_HEIGHT
+                });
+            }
         }
     }
 
