@@ -1,6 +1,6 @@
 {
   "name": "carrot-jump",
-  "version": "1.0.0",
+  "version": "1.0.7",
   "description": "A fun bunny jumping game built with TypeScript and HTML5 Canvas",
   "type": "module",
   "scripts": {
@@ -12,14 +12,16 @@
     "format": "prettier --write \"src/**/*.ts\"",
     "version:major": "tsx scripts/version.ts major",
     "version:minor": "tsx scripts/version.ts minor",
-    "version:build": "tsx scripts/version.ts build"
+    "version:build": "tsx scripts/version.ts build",
+    "generate-icons": "tsx scripts/generate-bunny-icon.ts",
+    "serve": "python scripts/serve.py"
   },
-  "dependencies": {},
   "devDependencies": {
     "@types/node": "^20.11.24",
     "@typescript-eslint/eslint-plugin": "^7.1.0",
     "@typescript-eslint/parser": "^7.1.0",
     "@vitest/coverage-v8": "^1.3.1",
+    "canvas": "^3.1.0",
     "eslint": "^8.57.0",
     "prettier": "^3.2.5",
     "tsx": "^4.7.1",
@@ -27,4 +29,4 @@
     "vite": "^5.1.4",
     "vitest": "^1.3.1"
   }
-} 
+}

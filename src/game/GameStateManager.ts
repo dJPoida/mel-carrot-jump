@@ -4,7 +4,6 @@ import * as constants from './constants';
 export class GameStateManager {
     private state: GameState;
     private eventListeners: Map<GameEvent, Set<() => void>> = new Map();
-    private gameOverStartTime: number = 0;
 
     constructor() {
         this.state = {
@@ -43,7 +42,6 @@ export class GameStateManager {
             isNewHighScore: false,
             screenShake: 0,
             isSplashScreen: false,
-            gameOverStartTime: 0,
             deathAnimation: {
                 startTime: 0,
                 startY: 0,
@@ -57,8 +55,7 @@ export class GameStateManager {
     public endGame(): void {
         this.state = {
             ...this.state,
-            gameOver: true,
-            gameOverStartTime: Date.now()
+            gameOver: true
         };
         if (Math.floor(this.state.score / constants.SCORE_PER_CARROT) > this.state.highScore) {
             this.state.highScore = Math.floor(this.state.score / constants.SCORE_PER_CARROT);

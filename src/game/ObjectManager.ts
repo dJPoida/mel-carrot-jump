@@ -1,4 +1,4 @@
-import { Obstacle, Carrot, Platform, GameObject } from '../types/game';
+import { Obstacle, Carrot, Platform } from '../types/game';
 import * as constants from './constants';
 import { GameStateManager } from './GameStateManager';
 
@@ -167,39 +167,5 @@ export class ObjectManager {
         this.carrots = [];
         this.platforms = [];
         this.currentScore = 0;
-    }
-
-    private isValidSpawnPosition(x: number, y: number, width: number, height: number): boolean {
-        const newObject: GameObject = { x, y, width, height };
-
-        // Check collision with existing platforms
-        for (const platform of this.platforms) {
-            if (this.isColliding(newObject, platform)) {
-                return false;
-            }
-        }
-
-        // Check collision with existing obstacles
-        for (const obstacle of this.obstacles) {
-            if (this.isColliding(newObject, obstacle)) {
-                return false;
-            }
-        }
-
-        // Check collision with existing carrots
-        for (const carrot of this.carrots) {
-            if (this.isColliding(newObject, carrot)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    private isColliding(rect1: GameObject, rect2: GameObject): boolean {
-        return rect1.x < rect2.x + rect2.width &&
-               rect1.x + rect1.width > rect2.x &&
-               rect1.y < rect2.y + rect2.height &&
-               rect1.y + rect1.height > rect2.y;
     }
 } 
