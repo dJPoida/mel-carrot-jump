@@ -39,8 +39,8 @@ export const PLATFORM_MAX_HEIGHT = 200;
 export const MAX_SPAWN_ATTEMPTS = 10;
 
 // Game Progression
-export const INITIAL_SCROLL_SPEED = 4;
-export const SPEED_INCREASE_PER_CARROT = 0.5;
+export const INITIAL_SCROLL_SPEED = 2;
+export const SPEED_INCREASE_PER_CARROT = 0.25;
 export const SCORE_PER_CARROT = 100;
 export const SPEED_INCREASE_SCORE_THRESHOLD = 200;
 
@@ -50,7 +50,7 @@ export const SHAKE_DURATION = 500;
 export const SHAKE_INTENSITY = 4;
 
 // Game State
-export const INITIAL_LIVES = 3;
+export const INITIAL_LIVES = 5;
 export const SPLASH_DURATION = 2000;
 
 // Death Animation
@@ -89,4 +89,8 @@ export const SPLASH_START_Y = 320;
 export const SPLASH_START_SHADOW_OFFSET = 1;
 export const SPLASH_CORNER_LENGTH = 10;
 export const SPLASH_CORNER_OFFSET = 10;
-export const SPLASH_BLINK_SPEED = 500; 
+export const SPLASH_BLINK_SPEED = 500;
+
+export const SPLASH_VERSION_FONT_SIZE = 12;
+export const SPLASH_VERSION_Y = 350;
+export const SPLASH_VERSION_SHADOW_OFFSET = 1; 

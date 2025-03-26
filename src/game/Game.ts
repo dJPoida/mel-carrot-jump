@@ -12,6 +12,7 @@ export class Game {
     private canvas: HTMLCanvasElement;
     private ctx: CanvasRenderingContext2D;
     private gameLoop: number | null = null;
+    private lastFrameTime: number = 0;
     private soundManager: SoundManager;
     private renderer: Renderer;
     private objectManager: ObjectManager;
@@ -71,7 +72,8 @@ export class Game {
         this.setupEventListeners();
         
         // Start the game loop
-        this.gameLoop = window.setInterval(() => this.update(), constants.FRAME_TIME);
+        this.lastFrameTime = performance.now();
+        this.gameLoop = requestAnimationFrame((timestamp) => this.update(timestamp));
     }
 
     private setupEventListeners(): void {
@@ -130,11 +132,19 @@ export class Game {
         }
     }
 
-    private update(): void {
+    private update(timestamp: number): void {
+        // Calculate delta time
+        const deltaTime = timestamp - this.lastFrameTime;
+        this.lastFrameTime = timestamp;
+
+        // Cap delta time to prevent huge jumps
+        const cappedDeltaTime = Math.min(deltaTime, 1000 / 30); // Cap at 30fps equivalent
+
         const state = this.stateManager.getState();
 
         if (state.isSplashScreen) {
             this.renderer.drawSplashScreen();
+            this.gameLoop = requestAnimationFrame((timestamp) => this.update(timestamp));
             return;
         }
 
@@ -152,10 +162,10 @@ export class Game {
 
         // Handle death animation
         if (state.deathAnimation.isActive) {
-            this.physicsManager.updateDeathAnimation(this.bunny, state.deathAnimation);
+            this.physicsManager.updateDeathAnimation(this.bunny, state.deathAnimation, cappedDeltaTime);
         } else if (!state.gameOver) {
             // Only update normal game physics if not game over
-            this.physicsManager.updateBunnyPhysics(this.bunny);
+            this.physicsManager.updateBunnyPhysics(this.bunny, cappedDeltaTime);
 
             // Check platform collisions
             for (const platform of this.objectManager.getPlatforms()) {
@@ -166,6 +176,7 @@ export class Game {
             for (const obstacle of this.objectManager.getObstacles()) {
                 if (this.physicsManager.isColliding(this.bunny, obstacle) && !this.bunny.invulnerable) {
                     this.handlePlayerDeath();
+                    this.gameLoop = requestAnimationFrame((timestamp) => this.update(timestamp));
                     return;
                 }
             }
@@ -184,6 +195,8 @@ export class Game {
             // Check if bunny is out of bounds
             if (this.physicsManager.isOutOfBounds(this.bunny)) {
                 this.handlePlayerDeath();
+                this.gameLoop = requestAnimationFrame((timestamp) => this.update(timestamp));
+                return;
             }
         }
 
@@ -230,6 +243,9 @@ export class Game {
         if (state.gameOver) {
             this.renderer.drawGameOver(state);
         }
+
+        // Request next frame
+        this.gameLoop = requestAnimationFrame((timestamp) => this.update(timestamp));
     }
 
     private handlePlayerDeath(): void {
@@ -296,14 +312,16 @@ export class Game {
 
         // Initialize lives display
         this.updateLivesDisplay();
+        
+        this.lastFrameTime = performance.now();
+        this.gameLoop = requestAnimationFrame((timestamp) => this.update(timestamp));
     }
 
     private restartGame(): void {
         if (this.gameLoop) {
-            clearInterval(this.gameLoop);
+            cancelAnimationFrame(this.gameLoop);
         }
         this.startGame();
-        this.gameLoop = window.setInterval(() => this.update(), constants.FRAME_TIME);
     }
 
     private resetHighScore(): void {
@@ -317,7 +335,7 @@ export class Game {
 
     public cleanup(): void {
         if (this.gameLoop) {
-            clearInterval(this.gameLoop);
+            cancelAnimationFrame(this.gameLoop);
         }
         this.inputManager.cleanup();
     }

@@ -1,52 +1,85 @@
-import { Bunny, GameObject, Platform } from '../types/game';
+import { Bunny, GameObject } from '../types/game';
 import * as constants from './constants';
 
 export class PhysicsManager {
-    public updateBunnyPhysics(bunny: Bunny): void {
-        bunny.velocityY += constants.GRAVITY;
-        bunny.y += bunny.velocityY;
+    private lastPlatformCollision: GameObject | null = null;
 
-        // Return bunny to default x position
-        if (bunny.x !== constants.DEFAULT_BUNNY_X) {
-            if (bunny.x < constants.DEFAULT_BUNNY_X) {
-                bunny.x += constants.RETURN_TO_CENTER_SPEED;
-            } else {
-                bunny.x -= constants.RETURN_TO_CENTER_SPEED;
-            }
+    public updateBunnyPhysics(bunny: Bunny, deltaTime: number): void {
+        // Apply gravity with delta time
+        bunny.velocityY += constants.GRAVITY * (deltaTime / 16.67); // Normalize to 60fps
+        bunny.y += bunny.velocityY * (deltaTime / 16.67);
+
+        // Apply return to center force
+        const centerX = constants.DEFAULT_BUNNY_X;
+        const distanceFromCenter = centerX - bunny.x;
+        if (Math.abs(distanceFromCenter) > 1) {
+            bunny.x += distanceFromCenter * constants.RETURN_TO_CENTER_SPEED * (deltaTime / 16.67);
+        } else {
+            bunny.x = centerX;
         }
 
         // Ground collision
-        if (bunny.y > constants.CANVAS_HEIGHT - constants.GROUND_HEIGHT - constants.BUNNY_HEIGHT) {
-            bunny.y = constants.CANVAS_HEIGHT - constants.GROUND_HEIGHT - constants.BUNNY_HEIGHT;
+        if (bunny.y > constants.CANVAS_HEIGHT - constants.GROUND_HEIGHT - bunny.height) {
+            bunny.y = Math.round(constants.CANVAS_HEIGHT - constants.GROUND_HEIGHT - bunny.height);
             bunny.velocityY = 0;
             bunny.isJumping = false;
             bunny.canDoubleJump = true;
         }
     }
 
-    public handlePlatformCollision(bunny: Bunny, platform: Platform): boolean {
+    public handlePlatformCollision(bunny: Bunny, platform: GameObject): boolean {
         if (this.isColliding(bunny, platform)) {
-            // Check if bunny is falling and above the platform
-            if (bunny.velocityY > 0 && 
-                bunny.y + bunny.height - bunny.velocityY <= platform.y) {
-                bunny.y = platform.y - bunny.height;
+            // Calculate overlap on each side
+            const overlapLeft = (bunny.x + bunny.width) - platform.x;
+            const overlapRight = (platform.x + platform.width) - bunny.x;
+            const overlapTop = (bunny.y + bunny.height) - platform.y;
+            const overlapBottom = (platform.y + platform.height) - bunny.y;
+
+            // Find the smallest overlap
+            const minOverlap = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom);
+
+            // Resolve collision based on the smallest overlap
+            if (minOverlap === overlapTop) {
+                // Collision from above (landing)
+                bunny.y = Math.round(platform.y - bunny.height);
                 bunny.velocityY = 0;
                 bunny.isJumping = false;
                 bunny.canDoubleJump = true;
+                this.lastPlatformCollision = platform;
                 return true;
+            } else if (minOverlap === overlapBottom) {
+                // Collision from below (hitting head)
+                bunny.y = Math.round(platform.y + platform.height);
+                bunny.velocityY = 0;
+                return true;
+            } else if (minOverlap === overlapLeft) {
+                // Collision from left
+                bunny.x = Math.round(platform.x - bunny.width);
+                return true;
+            } else if (minOverlap === overlapRight) {
+                // Collision from right
+                bunny.x = Math.round(platform.x + platform.width);
+                return true;
+            }
+        } else if (this.lastPlatformCollision === platform) {
+            // If we're no longer colliding with the last platform we were on,
+            // and we're not jumping, start falling
+            if (!bunny.isJumping && bunny.velocityY === 0) {
+                bunny.velocityY = 0.1; // Small initial velocity to start falling
+                this.lastPlatformCollision = null;
             }
         }
         return false;
     }
 
-    public updateDeathAnimation(bunny: Bunny, deathAnimation: { startTime: number; startY: number; finalY: number; isActive: boolean }): void {
+    public updateDeathAnimation(bunny: Bunny, deathAnimation: { startTime: number; startY: number; finalY: number; isActive: boolean }, deltaTime: number): void {
         if (!deathAnimation.isActive) return;
 
         const elapsed = (Date.now() - deathAnimation.startTime) / 1000;
         
-        // Apply the same jump physics as regular gameplay
-        bunny.velocityY += constants.GRAVITY;
-        bunny.y += bunny.velocityY;
+        // Apply the same jump physics as regular gameplay with delta time
+        bunny.velocityY += constants.GRAVITY * (deltaTime / 16.67);
+        bunny.y += bunny.velocityY * (deltaTime / 16.67);
 
         // Stop at ground level
         if (bunny.y > deathAnimation.finalY) {

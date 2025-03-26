@@ -1,13 +1,24 @@
 import { Bunny, Obstacle, Carrot, Platform, Particle, GameState } from '../types/game';
 import * as constants from './constants';
+import { VERSION } from '../version';
 
 export class Renderer {
     private ctx: CanvasRenderingContext2D;
     private canvas: HTMLCanvasElement;
+    private obstacleGradient: CanvasGradient | null = null;
 
     constructor(ctx: CanvasRenderingContext2D) {
         this.ctx = ctx;
         this.canvas = ctx.canvas;
+        this.createObstacleGradient();
+    }
+
+    private createObstacleGradient(): void {
+        this.obstacleGradient = this.ctx.createLinearGradient(0, 0, constants.OBSTACLE_WIDTH, constants.OBSTACLE_HEIGHT);
+        this.obstacleGradient.addColorStop(0, '#C0C0C0');   // Silver base
+        this.obstacleGradient.addColorStop(0.3, '#FFFFFF'); // Highlight
+        this.obstacleGradient.addColorStop(0.7, '#A0A0A0'); // Shadow
+        this.obstacleGradient.addColorStop(1, '#808080');   // Dark edge
     }
 
     public clear(): void {
@@ -59,8 +70,10 @@ export class Renderer {
         const mouthY = bunny.y + 16;
         const mouthX = bunny.x + bunny.width / 2;
 
-        if (lives === 3) {
+        if (lives >= 4) {
             this.ctx.arc(mouthX, mouthY, 4, 0, Math.PI);
+        } else if (lives === 3) {
+            this.ctx.arc(mouthX, mouthY, 3.5, 0, Math.PI);
         } else if (lives === 2) {
             this.ctx.arc(mouthX, mouthY, 2.8, 0, Math.PI);
         } else if (lives === 1) {
@@ -71,24 +84,35 @@ export class Renderer {
         }
         this.ctx.stroke();
 
+        // Draw bunny feet
+        this.ctx.fillStyle = '#FFE4E1';  // Pastel pink (Misty Rose)
+        this.ctx.strokeStyle = '#FFB6C1';  // Light pink outline
+        this.ctx.lineWidth = 1;
+        
+        // Calculate feet position based on jumping state
+        const feetY = bunny.y + bunny.height - 4 + (bunny.isJumping ? 8 : 0);
+        
+        this.ctx.beginPath();
+        this.ctx.ellipse(bunny.x + 8, feetY, 6, 4, 0, 0, Math.PI);
+        this.ctx.fill();
+        this.ctx.stroke();
+        
+        this.ctx.beginPath();
+        this.ctx.ellipse(bunny.x + bunny.width - 8, feetY, 6, 4, 0, 0, Math.PI);
+        this.ctx.fill();
+        this.ctx.stroke();
+        
+
         this.ctx.restore();
     }
 
     public drawObstacle(obstacle: Obstacle): void {
-        // Create metallic gradient for the spike
-        const gradient = this.ctx.createLinearGradient(
-            obstacle.x, 
-            obstacle.y, 
-            obstacle.x + obstacle.width, 
-            obstacle.y + obstacle.height
-        );
-        gradient.addColorStop(0, '#C0C0C0');   // Silver base
-        gradient.addColorStop(0.3, '#FFFFFF'); // Highlight
-        gradient.addColorStop(0.7, '#A0A0A0'); // Shadow
-        gradient.addColorStop(1, '#808080');   // Dark edge
+        if (!this.obstacleGradient) {
+            this.createObstacleGradient();
+        }
 
-        // Draw spike body with gradient
-        this.ctx.fillStyle = gradient;
+        // Draw spike body with cached gradient
+        this.ctx.fillStyle = this.obstacleGradient!;
         this.ctx.beginPath();
         this.ctx.moveTo(obstacle.x, obstacle.y + obstacle.height);
         this.ctx.lineTo(obstacle.x + obstacle.width/2, obstacle.y);
@@ -276,7 +300,7 @@ export class Renderer {
         this.ctx.textAlign = 'center';
         this.ctx.fillText('🎯 Collect the carrots to win', 400, constants.SPLASH_RULES_START_Y);
         this.ctx.fillText('⚠️ Avoid the spikes', 400, constants.SPLASH_RULES_START_Y + constants.SPLASH_RULES_LINE_HEIGHT);
-        this.ctx.fillText('❤️ You get three lives', 400, constants.SPLASH_RULES_START_Y + constants.SPLASH_RULES_LINE_HEIGHT * 2);
+        this.ctx.fillText('❤️ You get five lives', 400, constants.SPLASH_RULES_START_Y + constants.SPLASH_RULES_LINE_HEIGHT * 2);
         this.ctx.fillText('⚡ The game gets faster!', 400, constants.SPLASH_RULES_START_Y + constants.SPLASH_RULES_LINE_HEIGHT * 3);
 
         // Draw start text with blinking effect
@@ -296,6 +320,20 @@ export class Renderer {
             constants.SPLASH_START_Y - constants.SPLASH_START_SHADOW_OFFSET);
         
         this.ctx.globalAlpha = 1;
+
+        // Draw version number
+        this.ctx.font = `${constants.SPLASH_VERSION_FONT_SIZE}px "Press Start 2P"`;
+        this.ctx.textAlign = 'center';
+        
+        // Draw version shadow
+        this.ctx.fillStyle = '#000000';
+        this.ctx.fillText(`v${VERSION}`, constants.CANVAS_WIDTH / 2 + constants.SPLASH_VERSION_SHADOW_OFFSET, 
+            constants.SPLASH_VERSION_Y);
+        
+        // Draw version text
+        this.ctx.fillStyle = '#FFA500';
+        this.ctx.fillText(`v${VERSION}`, constants.CANVAS_WIDTH / 2, 
+            constants.SPLASH_VERSION_Y - constants.SPLASH_VERSION_SHADOW_OFFSET);
     }
 
     public applyScreenShake(intensity: number): void {
