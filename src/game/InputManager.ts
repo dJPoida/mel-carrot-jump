@@ -11,8 +11,15 @@ export class InputManager {
     private isSplashScreen: boolean = true;
     private stateManager: GameStateManager;
     private keydownHandler: (event: KeyboardEvent) => void;
-    private mousedownHandler: () => void;
+    private keyupHandler: (event: KeyboardEvent) => void;
+    private mousedownHandler: (event: MouseEvent) => void;
+    private mouseupHandler: (event: MouseEvent) => void;
     private touchstartHandler: (event: TouchEvent) => void;
+    private touchendHandler: (event: TouchEvent) => void;
+    private isKeyPressed: boolean = false;
+    private isTouchActive: boolean = false;
+    private lastJumpTime: number = 0;
+    private readonly JUMP_DEBOUNCE_TIME: number = 200; // Minimum time between jumps in ms
 
     constructor(
         bunny: Bunny,
@@ -31,14 +38,39 @@ export class InputManager {
         
         // Store event handlers
         this.keydownHandler = (event: KeyboardEvent) => {
-            if (event.code === 'Space') {
+            if (event.code === 'Space' && !this.isKeyPressed) {
+                this.isKeyPressed = true;
                 this.handleButtonPress();
             }
         };
-        this.mousedownHandler = () => this.handleButtonPress();
+
+        this.keyupHandler = (event: KeyboardEvent) => {
+            if (event.code === 'Space') {
+                this.isKeyPressed = false;
+            }
+        };
+
+        this.mousedownHandler = (_event: MouseEvent) => {
+            if (!this.isTouchActive) {
+                this.handleButtonPress();
+            }
+        };
+
+        this.mouseupHandler = (_event: MouseEvent) => {
+            this.isTouchActive = false;
+        };
+
         this.touchstartHandler = (event: TouchEvent) => {
             event.preventDefault();
-            this.handleButtonPress();
+            if (!this.isTouchActive) {
+                this.isTouchActive = true;
+                this.handleButtonPress();
+            }
+        };
+
+        this.touchendHandler = (event: TouchEvent) => {
+            event.preventDefault();
+            this.isTouchActive = false;
         };
         
         this.setupEventListeners();
@@ -47,6 +79,7 @@ export class InputManager {
     private setupEventListeners(): void {
         // Keyboard events
         document.addEventListener('keydown', this.keydownHandler);
+        document.addEventListener('keyup', this.keyupHandler);
         
         // Mouse events
         document.addEventListener('mousedown', (event) => {
@@ -54,8 +87,9 @@ export class InputManager {
             if (event.target instanceof HTMLElement && event.target.id === 'highScore') {
                 return;
             }
-            this.handleButtonPress();
+            this.mousedownHandler(event);
         });
+        document.addEventListener('mouseup', this.mouseupHandler);
         
         // Touch events
         document.addEventListener('touchstart', (event) => {
@@ -64,8 +98,9 @@ export class InputManager {
             if (event.target instanceof HTMLElement && event.target.id === 'highScore') {
                 return;
             }
-            this.handleButtonPress();
+            this.touchstartHandler(event);
         });
+        document.addEventListener('touchend', this.touchendHandler);
         
         // UI events
         document.getElementById('restartButton')?.addEventListener('click', () => this.onGameRestart());
@@ -73,6 +108,11 @@ export class InputManager {
     }
 
     private handleButtonPress(): void {
+        const currentTime = Date.now();
+        if (currentTime - this.lastJumpTime < this.JUMP_DEBOUNCE_TIME) {
+            return; // Ignore the press if it's too soon after the last jump
+        }
+
         if (this.isSplashScreen) {
             this.isSplashScreen = false;
             this.onGameStart();
@@ -92,10 +132,12 @@ export class InputManager {
             this.bunny.velocityY = constants.JUMP_FORCE;
             this.bunny.isJumping = true;
             this.onJump();
+            this.lastJumpTime = currentTime;
         } else if (this.bunny.canDoubleJump) {
             this.bunny.velocityY = constants.JUMP_FORCE;
             this.bunny.canDoubleJump = false;
             this.onJump();
+            this.lastJumpTime = currentTime;
         }
     }
 
@@ -111,7 +153,10 @@ export class InputManager {
     public cleanup(): void {
         // Remove all event listeners
         document.removeEventListener('keydown', this.keydownHandler);
+        document.removeEventListener('keyup', this.keyupHandler);
         document.removeEventListener('mousedown', this.mousedownHandler);
+        document.removeEventListener('mouseup', this.mouseupHandler);
         document.removeEventListener('touchstart', this.touchstartHandler);
+        document.removeEventListener('touchend', this.touchendHandler);
     }
 } 
