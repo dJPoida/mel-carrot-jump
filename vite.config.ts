@@ -3,6 +3,12 @@ import { resolve } from 'path';
 import { execSync } from 'child_process';
 import { readFileSync, writeFileSync } from 'fs';
 
+// Generate a unique version for development
+const generateDevVersion = () => {
+    const timestamp = Date.now();
+    return `dev-${timestamp}`;
+};
+
 // Run version increment script before build
 if (process.env.NODE_ENV === 'production') {
     try {
@@ -17,6 +23,12 @@ export const VERSION = '${packageJson.version}';
     } catch (error) {
         console.error('Failed to increment version:', error);
     }
+} else {
+    // Generate development version
+    const versionContent = `// This file is auto-generated during development
+export const VERSION = '${generateDevVersion()}';
+`;
+    writeFileSync('src/version.ts', versionContent);
 }
 
 export default defineConfig({

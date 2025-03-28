@@ -1,6 +1,9 @@
 const STATIC_CACHE_NAME = 'carrot-jump-static-v2';
 const DYNAMIC_CACHE_NAME = 'carrot-jump-dynamic-v2';
 
+// Check if we're in development mode
+const isDevelopment = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
+
 // Assets that need to be available for offline use
 const STATIC_ASSETS = [
     '/',
@@ -51,6 +54,33 @@ self.addEventListener('fetch', (event) => {
 
     // Skip source map requests
     if (event.request.url.endsWith('.map')) {
+        return;
+    }
+
+    // In development, always try network first
+    if (isDevelopment) {
+        event.respondWith(
+            fetch(event.request)
+                .then(response => {
+                    // Cache the response
+                    const responseToCache = response.clone();
+                    caches.open(DYNAMIC_CACHE_NAME)
+                        .then(cache => {
+                            cache.put(event.request, responseToCache);
+                        });
+                    return response;
+                })
+                .catch(() => {
+                    // If network fails, try cache
+                    return caches.match(event.request)
+                        .then(cachedResponse => {
+                            if (cachedResponse) {
+                                return cachedResponse;
+                            }
+                            return caches.match('/index.html');
+                        });
+                })
+        );
         return;
     }
 
