@@ -20,15 +20,36 @@ if (process.env.NODE_ENV === 'production') {
 export const VERSION = '${packageJson.version}';
 `;
         writeFileSync('src/version.ts', versionContent);
+
+        // Update service worker with version
+        let swContent = readFileSync('public/sw.js', 'utf-8');
+        swContent = swContent.replace(/const VERSION = '.*?';/, `const VERSION = '${packageJson.version}';`);
+        writeFileSync('public/sw.js', swContent);
+
+        // Update index.html with version
+        let indexContent = readFileSync('index.html', 'utf-8');
+        indexContent = indexContent.replace(/let currentVersion = '.*?';/, `let currentVersion = '${packageJson.version}';`);
+        writeFileSync('index.html', indexContent);
     } catch (error) {
         console.error('Failed to increment version:', error);
     }
 } else {
     // Generate development version
+    const devVersion = generateDevVersion();
     const versionContent = `// This file is auto-generated during development
-export const VERSION = '${generateDevVersion()}';
+export const VERSION = '${devVersion}';
 `;
     writeFileSync('src/version.ts', versionContent);
+
+    // Update service worker with dev version
+    let swContent = readFileSync('public/sw.js', 'utf-8');
+    swContent = swContent.replace(/const VERSION = '.*?';/, `const VERSION = '${devVersion}';`);
+    writeFileSync('public/sw.js', swContent);
+
+    // Update index.html with dev version
+    let indexContent = readFileSync('index.html', 'utf-8');
+    indexContent = indexContent.replace(/let currentVersion = '.*?';/, `let currentVersion = '${devVersion}';`);
+    writeFileSync('index.html', indexContent);
 }
 
 export default defineConfig({

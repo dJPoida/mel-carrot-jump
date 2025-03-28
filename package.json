@@ -1,6 +1,6 @@
 {
   "name": "carrot-jump",
-  "version": "1.0.9",
+  "version": "1.0.18",
   "description": "A fun bunny jumping game built with TypeScript and HTML5 Canvas",
   "type": "module",
   "scripts": {

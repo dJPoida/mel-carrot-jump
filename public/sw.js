@@ -1,5 +1,6 @@
-const STATIC_CACHE_NAME = 'carrot-jump-static-v2';
-const DYNAMIC_CACHE_NAME = 'carrot-jump-dynamic-v2';
+const VERSION = '1.0.18';
+const STATIC_CACHE_NAME = `carrot-jump-static-v${VERSION}`;
+const DYNAMIC_CACHE_NAME = `carrot-jump-dynamic-v${VERSION}`;
 
 // Check if we're in development mode
 const isDevelopment = self.location.hostname === 'localhost' || self.location.hostname === '127.0.0.1';
@@ -26,21 +27,35 @@ self.addEventListener('install', (event) => {
     );
 });
 
-// Activate event - clean up old caches
+// Activate event - clean up old caches and notify clients
 self.addEventListener('activate', (event) => {
     event.waitUntil(
-        caches.keys().then(cacheNames => {
-            return Promise.all(
-                cacheNames
-                    .filter(name => name.startsWith('carrot-jump-'))
-                    .filter(name => name !== STATIC_CACHE_NAME && name !== DYNAMIC_CACHE_NAME)
-                    .map(name => caches.delete(name))
-            );
-        })
+        Promise.all([
+            // Clean up old caches
+            caches.keys().then(cacheNames => {
+                return Promise.all(
+                    cacheNames
+                        .filter(name => name.startsWith('carrot-jump-'))
+                        .filter(name => name !== STATIC_CACHE_NAME && name !== DYNAMIC_CACHE_NAME)
+                        .map(name => caches.delete(name))
+                );
+            }),
+            // Notify all clients about the new version
+            self.clients.matchAll().then(clients => {
+                return Promise.all(
+                    clients.map(client => {
+                        return client.postMessage({
+                            type: 'NEW_VERSION',
+                            version: VERSION
+                        });
+                    })
+                );
+            })
+        ])
     );
 });
 
-// Fetch event - serve from cache, fall back to network
+// Fetch event - use different strategies for development and production
 self.addEventListener('fetch', (event) => {
     // Skip non-GET requests
     if (event.request.method !== 'GET') {
@@ -57,70 +72,33 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // In development, always try network first
-    if (isDevelopment) {
-        event.respondWith(
-            fetch(event.request)
-                .then(response => {
-                    // Cache the response
-                    const responseToCache = response.clone();
-                    caches.open(DYNAMIC_CACHE_NAME)
-                        .then(cache => {
-                            cache.put(event.request, responseToCache);
-                        });
-                    return response;
-                })
-                .catch(() => {
-                    // If network fails, try cache
-                    return caches.match(event.request)
-                        .then(cachedResponse => {
-                            if (cachedResponse) {
-                                return cachedResponse;
-                            }
-                            return caches.match('/index.html');
-                        });
-                })
-        );
-        return;
-    }
-
-    // Handle HTML requests with network-first strategy
-    if (event.request.headers.get('accept').includes('text/html')) {
-        event.respondWith(
-            fetch(event.request)
-                .then(response => {
-                    // Cache the response
-                    const responseToCache = response.clone();
-                    caches.open(DYNAMIC_CACHE_NAME)
-                        .then(cache => {
-                            cache.put(event.request, responseToCache);
-                        });
-                    return response;
-                })
-                .catch(() => {
-                    // If network fails, try cache
-                    return caches.match(event.request)
-                        .then(cachedResponse => {
-                            if (cachedResponse) {
-                                return cachedResponse;
-                            }
-                            return caches.match('/index.html');
-                        });
-                })
-        );
-        return;
-    }
-
-    // For all other requests, use cache-first strategy
+    // Try to get from cache first
     event.respondWith(
         caches.match(event.request)
             .then(cachedResponse => {
-                // Return cached response if found
+                // If we have a cached response, use it
                 if (cachedResponse) {
+                    // In development, try to update cache in the background if online
+                    if (isDevelopment) {
+                        fetch(event.request)
+                            .then(response => {
+                                if (!response || response.status !== 200 || response.type !== 'basic') {
+                                    return;
+                                }
+                                const responseToCache = response.clone();
+                                caches.open(DYNAMIC_CACHE_NAME)
+                                    .then(cache => {
+                                        cache.put(event.request, responseToCache);
+                                    });
+                            })
+                            .catch(() => {
+                                // Ignore fetch errors - we're already using cached response
+                            });
+                    }
                     return cachedResponse;
                 }
 
-                // Otherwise, fetch from network
+                // If no cache found, try network
                 return fetch(event.request)
                     .then(response => {
                         // Check if we received a valid response
@@ -140,8 +118,8 @@ self.addEventListener('fetch', (event) => {
                         return response;
                     })
                     .catch(() => {
-                        // If both cache and network fail, return a fallback
-                        if (event.request.url.indexOf('.html') > -1) {
+                        // If network fails and it's an HTML request, return index.html
+                        if (event.request.headers.get('accept').includes('text/html')) {
                             return caches.match('/index.html');
                         }
                         return new Response('Offline content not available');

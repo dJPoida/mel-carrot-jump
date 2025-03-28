@@ -1,2 +1,2 @@
-// This file is auto-generated during development
-export const VERSION = 'dev-1743140916639';
+// This file is auto-generated during build
+export const VERSION = '1.0.18';
