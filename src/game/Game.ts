@@ -21,6 +21,7 @@ export class Game {
     private inputManager: InputManager;
     private bunny: Bunny;
     private particles: Particle[] = [];
+    private scale: number = 1;
 
     constructor() {
         this.canvas = document.getElementById('gameCanvas') as HTMLCanvasElement;
@@ -71,9 +72,36 @@ export class Game {
         // Set up event listeners
         this.setupEventListeners();
         
+        // Handle window resize
+        window.addEventListener('resize', () => this.handleResize());
+        this.handleResize(); // Initial resize
+        
         // Start the game loop
         this.lastFrameTime = performance.now();
         this.gameLoop = requestAnimationFrame((timestamp) => this.update(timestamp));
+    }
+
+    private handleResize(): void {
+        const container = this.canvas.parentElement;
+        if (!container) return;
+
+        const containerWidth = container.clientWidth;
+        const containerHeight = container.clientHeight;
+
+        // Calculate scale to maintain aspect ratio
+        const scaleX = containerWidth / constants.CANVAS_WIDTH;
+        const scaleY = containerHeight / constants.CANVAS_HEIGHT;
+        this.scale = Math.min(scaleX, scaleY);
+
+        // Set canvas style dimensions
+        this.canvas.style.width = `${constants.CANVAS_WIDTH * this.scale}px`;
+        this.canvas.style.height = `${constants.CANVAS_HEIGHT * this.scale}px`;
+
+        // Scale the game overlay
+        const overlay = document.querySelector('.game-overlay') as HTMLElement;
+        if (overlay) {
+            overlay.style.transform = `translate(-50%, -50%) scale(${this.scale})`;
+        }
     }
 
     private setupEventListeners(): void {
