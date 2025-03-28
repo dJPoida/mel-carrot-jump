@@ -1,8 +1,11 @@
 {
-  "name": "carrot-jump",
+  "name": "mel-carrot-jump",
   "version": "1.0.20",
   "description": "A fun bunny jumping game built with TypeScript and HTML5 Canvas",
   "type": "module",
+  "author": {
+    "name": "Maddy Emmy Labs"
+  },
   "scripts": {
     "start": "vite",
     "build": "tsc && vite build",

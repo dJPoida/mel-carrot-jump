@@ -1,6 +1,6 @@
-# Bunny Game
+# Mel Carrot Jump
 
-A fun bunny jumping game built with TypeScript and HTML5 Canvas. Collect carrots, avoid spikes, and try to get the highest score!
+A fun bunny jumping game built with TypeScript and HTML5 Canvas. Collect carrots, avoid obstacles, and try to get the highest score!
 
 ## Features
 
@@ -11,6 +11,10 @@ A fun bunny jumping game built with TypeScript and HTML5 Canvas. Collect carrots
 - Double jump mechanics
 - Death animation with screen shake
 - Responsive controls
+- Lives system
+- Dynamic obstacle generation
+- Particle effects for visual feedback
+- Responsive canvas that adapts to window size
 
 ## Development Setup
 
@@ -34,6 +38,11 @@ npm test
 npm run build
 ```
 
+5. Run tests with coverage:
+```bash
+npm run test:coverage
+```
+
 ## Project Structure
 
 ```
@@ -44,7 +53,12 @@ src/
 │   ├── constants.ts
 │   ├── Game.ts
 │   ├── Particle.ts
-│   └── SoundManager.ts
+│   ├── SoundManager.ts
+│   ├── Renderer.ts
+│   ├── ObjectManager.ts
+│   ├── PhysicsManager.ts
+│   ├── GameStateManager.ts
+│   └── InputManager.ts
 ├── types/          # TypeScript type definitions
 ├── utils/          # Utility functions
 ├── index.ts        # Main entry point
@@ -65,6 +79,16 @@ src/
 - Vitest
 - ESLint
 - Prettier
+- Node.js Canvas (for development)
+
+## Version Management
+
+The project uses semantic versioning. You can update versions using:
+```bash
+npm run version:major  # For major version updates
+npm run version:minor  # For minor version updates
+npm run version:build  # For build version updates
+```
 
 ## License
 
