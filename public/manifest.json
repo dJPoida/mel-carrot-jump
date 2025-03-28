@@ -2,7 +2,7 @@
   "name": "Carrot Jump",
   "short_name": "CarrotJump",
   "description": "A fun bunny jumping game built with TypeScript and HTML5 Canvas",
-  "start_url": "/",
+  "start_url": "/?source=pwa",
   "display": "standalone",
   "orientation": "landscape",
   "background_color": "#ffffff",
@@ -31,6 +31,15 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Play Carrot Jump",
+      "short_name": "Play",
+      "description": "Start playing Carrot Jump",
+      "url": "/?source=pwa",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
     }
   ]
 } 

@@ -1,4 +1,4 @@
-const VERSION = '1.0.18';
+const VERSION = '1.0.20';
 const STATIC_CACHE_NAME = `carrot-jump-static-v${VERSION}`;
 const DYNAMIC_CACHE_NAME = `carrot-jump-dynamic-v${VERSION}`;
 
@@ -15,7 +15,13 @@ const STATIC_ASSETS = [
     '/icons/icon-16x16.png',
     '/icons/icon-32x32.png',
     '/icons/icon-192x192.png',
-    '/icons/icon-512x512.png'
+    '/icons/icon-512x512.png',
+    '/src/index.ts',
+    '/src/styles.css',
+    '/src/game/constants.ts',
+    '/src/game/GameStateManager.ts',
+    '/src/game/Renderer.ts',
+    '/src/game/version.ts'
 ];
 
 // Install event - cache static assets
@@ -55,7 +61,7 @@ self.addEventListener('activate', (event) => {
     );
 });
 
-// Fetch event - use different strategies for development and production
+// Fetch event - use cache-first strategy for better offline support
 self.addEventListener('fetch', (event) => {
     // Skip non-GET requests
     if (event.request.method !== 'GET') {
@@ -78,23 +84,22 @@ self.addEventListener('fetch', (event) => {
             .then(cachedResponse => {
                 // If we have a cached response, use it
                 if (cachedResponse) {
-                    // In development, try to update cache in the background if online
-                    if (isDevelopment) {
-                        fetch(event.request)
-                            .then(response => {
-                                if (!response || response.status !== 200 || response.type !== 'basic') {
-                                    return;
-                                }
-                                const responseToCache = response.clone();
-                                caches.open(DYNAMIC_CACHE_NAME)
-                                    .then(cache => {
-                                        cache.put(event.request, responseToCache);
-                                    });
-                            })
-                            .catch(() => {
-                                // Ignore fetch errors - we're already using cached response
-                            });
-                    }
+                    // Try to update cache in the background
+                    fetch(event.request)
+                        .then(response => {
+                            if (!response || response.status !== 200 || response.type !== 'basic') {
+                                return;
+                            }
+                            const responseToCache = response.clone();
+                            caches.open(DYNAMIC_CACHE_NAME)
+                                .then(cache => {
+                                    cache.put(event.request, responseToCache);
+                                });
+                        })
+                        .catch(() => {
+                            // Ignore fetch errors - we're already using cached response
+                        });
+
                     return cachedResponse;
                 }
 

@@ -29,7 +29,7 @@
     </div>
     <script type="module" src="src/index.ts"></script>
     <script>
-        let currentVersion = '1.0.18';
+        let currentVersion = '1.0.20';
         let serviceWorkerRegistration = null;
 
         // Force fullscreen on Android
@@ -57,18 +57,33 @@
 
         // Register service worker
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(registration => {
-                        console.log('ServiceWorker registration successful');
-                        serviceWorkerRegistration = registration;
-                        // Request fullscreen after service worker is registered
-                        setTimeout(requestFullscreen, 100);
-                    })
-                    .catch(err => {
-                        console.log('ServiceWorker registration failed: ', err);
-                    });
+            // Check if the service worker is already registered
+            navigator.serviceWorker.getRegistration().then(registration => {
+                if (registration) {
+                    console.log('ServiceWorker already registered:', registration);
+                    serviceWorkerRegistration = registration;
+                } else {
+                    console.log('No ServiceWorker registration found, registering...');
+                    registerServiceWorker();
+                }
+            }).catch(error => {
+                console.error('ServiceWorker registration error:', error);
             });
+        } else {
+            console.log('ServiceWorker not supported');
+        }
+
+        function registerServiceWorker() {
+            navigator.serviceWorker.register('/sw.js')
+                .then(registration => {
+                    console.log('ServiceWorker registration successful:', registration);
+                    serviceWorkerRegistration = registration;
+                    // Request fullscreen after service worker is registered
+                    setTimeout(requestFullscreen, 100);
+                })
+                .catch(err => {
+                    console.error('ServiceWorker registration failed:', err);
+                });
         }
 
         // Listen for messages from the service worker
@@ -78,6 +93,15 @@
                 // Reload the page to get the new version
                 window.location.reload();
             }
+        });
+
+        // Handle offline/online status
+        window.addEventListener('online', () => {
+            console.log('App is online');
+        });
+
+        window.addEventListener('offline', () => {
+            console.log('App is offline');
         });
 
         // Request fullscreen on initial load
