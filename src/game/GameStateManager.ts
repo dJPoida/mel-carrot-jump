@@ -55,7 +55,8 @@ export class GameStateManager {
     public endGame(): void {
         this.state = {
             ...this.state,
-            gameOver: true
+            gameOver: true,
+            gameOverStartTime: Date.now()
         };
         if (Math.floor(this.state.score / constants.SCORE_PER_CARROT) > this.state.highScore) {
             this.state.highScore = Math.floor(this.state.score / constants.SCORE_PER_CARROT);

@@ -1,6 +1,6 @@
 {
   "name": "mel-carrot-jump",
-  "version": "1.0.20",
+  "version": "1.0.21",
   "description": "A fun bunny jumping game built with TypeScript and HTML5 Canvas",
   "type": "module",
   "author": {

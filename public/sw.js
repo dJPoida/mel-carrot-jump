@@ -1,4 +1,4 @@
-const VERSION = '1.0.20';
+const VERSION = '1.0.21';
 const STATIC_CACHE_NAME = `carrot-jump-static-v${VERSION}`;
 const DYNAMIC_CACHE_NAME = `carrot-jump-dynamic-v${VERSION}`;
 
